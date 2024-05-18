@@ -1,0 +1,24 @@
+
+
+3 Layers
+
+MVT pattern
+
+1. model -- database
+2. view  -- business
+3. template -- enduser can see the output
+
+
+
+# permanent storage locations
+
+1. files
+2. database
+
+
+# curd / crud
+
+c - create
+u - update
+r - read
+d - delete

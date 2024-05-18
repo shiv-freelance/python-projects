@@ -11,6 +11,8 @@
 # 8. Done.
 import random
 
+from connectors import get_sql_connection
+
 voters = {
     54968937: {"name": "Sita", "age": 26, "city": "Ayodhya"},
     9673267: {"name": "Rama", "age": 30, "city": "Ayodhya"},
@@ -25,7 +27,40 @@ def generate_voterId():
     return random.randint(100000, 100000000)
 
 
+def create_voter_table(connection):
+    try:
+        query = """CREATE TABLE Voter(
+                    voter_id INT PRIMARY KEY,
+                    voter_name VARCHAR(255) NOT NULL,
+                    voter_age INT,
+                    voter_city VARCHAR(255)
+        )"""
+        cursor = connection.cursor()
+        cursor.execute(query)
+        connection.commit()
+
+        return True
+    except Exception as exce:
+        print(str(exce))
+        return False
+    
+
+def insert_voter_details(connection, query):
+    cursor = connection.cursor()
+    cursor.execute(query)
+    connection.commit()
+    
+
+
 def vote_registration():
+
+    connection = get_sql_connection()
+
+    # db_check = create_voter_table(connection)
+
+    # if not db_check:
+    #     raise Exception("Database table creation failed.")
+
     name = input("Please enter your name: ")
     age = int(input(f"{name} your age please: "))
     city = input(f"{name} please enter the city name: ")
@@ -38,7 +73,13 @@ def vote_registration():
     else:
         voter_id = generate_voterId()
         voter = {"name": name, "age": age, "city": city}
-        voters[voter_id] = voter
+        # voters[voter_id] = voter
+        insert_query = f"""INSERT INTO Voter
+                (voter_id, voter_name, voter_age, voter_city) 
+                VALUES ({voter_id}, '{name}', {age}, '{city}')"""
+        
+        insert_voter_details(connection, insert_query)
+
         print("voter registration is done!")
 
 
@@ -55,6 +96,7 @@ def cast_vote():
         print("voting is done!")
 
 
+# template layer
 def menu():
     print(
         """

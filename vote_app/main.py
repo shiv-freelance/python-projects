@@ -10,17 +10,35 @@
 # 7. production - UAT
 # 8. Done.
 import random
+import time
 
 from connectors import get_sql_connection
 
-voters = {
-    54968937: {"name": "Sita", "age": 26, "city": "Ayodhya"},
-    9673267: {"name": "Rama", "age": 30, "city": "Ayodhya"},
-}
+
+def get_all_voters(connection):
+    # all voter details is in db
+    cursor = connection.cursor() # cursor to execute queries
+
+    query = "select * from voter"
+    cursor.execute(query)
+
+    all_voters = cursor.fetchall() # getting all the records
+
+    return all_voters
 
 
-def get_all_voters():
-    return voters
+def get_voter_details_by_id(connection):
+    """getting voter details with voterId
+    """
+    voter_id = input("please enter your voterId: ")
+    cursor = connection.cursor() # cursor to execute queries
+    try:
+        voter_id = int(voter_id)
+        query = f"select * from voter where voter_id = {voter_id}"
+        cursor.execute(query)
+        return cursor.fetchone()
+    except ValueError:
+        print("Please enter valid input!")
 
 
 def generate_voterId():
@@ -52,12 +70,9 @@ def insert_voter_details(connection, query):
     
 
 
-def vote_registration():
-
-    connection = get_sql_connection()
+def vote_registration(connection):
 
     # db_check = create_voter_table(connection)
-
     # if not db_check:
     #     raise Exception("Database table creation failed.")
 
@@ -83,13 +98,16 @@ def vote_registration():
         print("voter registration is done!")
 
 
-def cast_vote():
-    voter_id = int(input("please enter your voterid: "))
+def cast_vote(connection):
     try:
-        if voter_id in voters:
-            print("voterId is verified")
+        print('please enter details to cast a vote....!')
+        voter_details = get_voter_details_by_id(connection)
+        if voter_details is None:
+            print('voter details not found!')
         else:
-            raise ValueError("Verification failed!")
+            print(voter_details)
+            print('please cast a vote...')
+            time.sleep(10)
     except ValueError as exce:
         print(exce)
     else:
@@ -105,17 +123,25 @@ def menu():
                 1. registration
                 2. voting
                 3. get all voters
+                4. get voter details by voter_id
                 9. exit
 """
     )
+    connection = get_sql_connection()
     while True:
         choice = input("please enter your choice: ")
         if choice == "1":
-            vote_registration()
+            vote_registration(connection)
         elif choice == "2":
-            cast_vote()
+            cast_vote(connection)
         elif choice == "3":
-            print(get_all_voters())
+            print(get_all_voters(connection))
+        elif choice == "4":
+            voter_details = get_voter_details_by_id(connection)
+            if voter_details is None:
+                print('voter details not found!')
+            else:
+                print(voter_details)
         elif choice == "9":
             print("Please visit again!")
             break
